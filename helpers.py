@@ -22,7 +22,7 @@ def create_order(user, selected_parts, total_price, profit):
     print('Order complete.')
 
 
-def show_parts(user):
+def show_parts():
     parts = get_parts()
     print('Available parts: ')
     print('Code, Name')
@@ -68,6 +68,21 @@ def buy_parts(user):
         buy_parts(user)
 
 
+def admin_menu(user):
+    users = get_users()
+    for u in users:
+        if u.email == user.email:
+            print('>', end='')
+        u.print_info()
+    selected_user_email = input('Select user by email: ')
+    selected_user = None
+    for u in users:
+        if u.email == selected_user_email:
+            pass
+
+    
+
+
 def main_menu(user):
     print('Please enter action:\n1: To view all of the parts\n2: To buys parts \n3: Logout')
     if user.role == 'admin':
@@ -75,13 +90,13 @@ def main_menu(user):
     action = input()
 
     if action == '1':
-        show_parts(user)
+        show_parts()
     elif action == '2':
         buy_parts(user)
     elif action == '3':
         login_menu()
     elif action == '0' and user.role == 'admin':
-        # admin menu
+        admin_menu(user)
         pass
     else:
         print('Not existing action')
