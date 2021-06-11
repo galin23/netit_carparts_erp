@@ -30,7 +30,7 @@ def get_orders():
         with open('orders.csv', newline='') as csvfile:
             reader = csv.DictReader(csvfile, delimiter=';')
             for row in reader:
-                order_list.append(Parts(**row))
+                order_list.append(Orders(**row))
     return order_list
 
 

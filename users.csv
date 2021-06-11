@@ -1,2 +1,3 @@
 email,password,first_name,last_name,phone_number,role,created
-galin@abv.bg,123,Galin,Jelev,0123123123,admin,2021-05-14 03:42:39.777623
+g@abv.bg,1234,G,J,01,admin,2021-05-14 03:42:39.777623
+s@abv.bg,123,S,G,12321321,admin,2021-05-14 21:17:34.028144

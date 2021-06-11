@@ -16,7 +16,7 @@ class Users:
         return f'{self.first_name} {self.last_name}'
 
     def print_info(self):
-        print(f'{self.role}: {self.email}, {self.first_name} {self.last_name}, {self.phone_number}, {self.created:%d.%m.%y %H:%M}')
+        print(f'{self.role}: {self.email}, {self.first_name} {self.last_name}, {self.phone_number}, {self.created}')
 
 
 class Parts:

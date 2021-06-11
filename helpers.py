@@ -2,8 +2,9 @@ import csv
 from os import path
 from datetime import datetime
 
-from getters import get_users, get_parts
-from models import Users, Orders
+from matplotlib import pyplot as plt
+
+from getters import get_users, get_parts, get_orders
 
 
 def create_order(user, selected_parts, total_price, profit):
@@ -25,9 +26,9 @@ def create_order(user, selected_parts, total_price, profit):
 def show_parts():
     parts = get_parts()
     print('Available parts: ')
-    print('Code, Name')
+    print('Code, Name, Application')
     for part in parts:
-        print(f'{part.code}, {part.name}')
+        print(f'{part.code}, {part.name}, {part.application}')
     user_picks = input('Please select part(s) for detail information using the code (1 2 3): ').split()
     selected_parts = []
     for part in parts:
@@ -43,9 +44,9 @@ def show_parts():
 def buy_parts(user):
     parts = get_parts()
     print('Available parts: ')
-    print('Code, Name, Price')
+    print('Code, Name, Application, Price')
     for part in parts:
-        print(f'{part.code}, {part.name}, {part.price_sell}')
+        print(f'{part.code}, {part.name}, {part.application}, {part.price_sell}')
     user_picks = input('Please select part(s) to buy using the code (1 2 3): ').split()
     selected_parts = []
     for part in parts:
@@ -68,39 +69,76 @@ def buy_parts(user):
         buy_parts(user)
 
 
-def admin_menu(user):
+def csv_users_update(users):
+    with open('users.csv', 'w', newline='') as csvfile:
+        fieldnames = users[0].__dict__.keys()
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        for user in users:
+            writer.writerow(user.__dict__)
+
+
+def update_users(user):
     users = get_users()
     for u in users:
         if u.email == user.email:
             print('>', end='')
         u.print_info()
     selected_user_email = input('Select user by email: ')
-    selected_user = None
+    to_update_users = False
     for u in users:
         if u.email == selected_user_email:
-            pass
-
-    
-
-
-def main_menu(user):
-    print('Please enter action:\n1: To view all of the parts\n2: To buys parts \n3: Logout')
-    if user.role == 'admin':
-        print('0: Admin menu')
-    action = input()
-
-    if action == '1':
-        show_parts()
-    elif action == '2':
-        buy_parts(user)
-    elif action == '3':
-        login_menu()
-    elif action == '0' and user.role == 'admin':
-        admin_menu(user)
-        pass
+            u.email = input('Please enter new email: ')
+            u.password = input('Please new enter password: ')
+            u.first_name = input('Enter new first name: ')
+            u.last_name = input('Enter new last name: ')
+            u.phone_number = input('Enter new phone number: ')
+            u.role = input('Enter new role: ')
+            to_update_users = True
+            break
     else:
-        print('Not existing action')
-    main_menu(user)
+        print('Email was not found')
+    if to_update_users:
+        csv_users_update(users)
+        print('User was successfully updated.')
+
+
+def show_income():
+    orders = get_orders()
+    orders.reverse()
+    # days = []
+    # profit = []
+    data = dict()
+    counter = 0
+    for order in orders:
+
+        counter += 1
+        if counter > 12:
+            break
+        # days.append(datetime.strptime(order.date[:10], '%Y-%m-%d').date())
+        # profit.append(float(order.profit))
+        order_date = order.date[:10]
+        if order_date in data:
+            data[order_date] += float(order.profit)
+        else:
+            data[order_date] = float(order.profit)
+    plt.bar(data.keys(), data.values())
+    plt.show()
+
+
+def admin_menu(user):
+    print(
+        'Please enter action:\n1: To update user information\n2: Show registered users \n3: Show income for last 12 days')
+    action = input()
+    if action == '1':
+        update_users(user)
+    elif action == '2':
+        pass
+    elif action == '3':
+        show_income()
+    else:
+        print('Invalid action')
 
 
 def find_user(email, password):
@@ -111,44 +149,9 @@ def find_user(email, password):
     return None
 
 
-def login_menu():
-    while True:
-        email = input('Please enter your email: ')
-        password = input('Please enter your password: ')
-        user = find_user(email, password)
-        if user:
-            main_menu(user)
-            break
-        else:
-            print('Wrong email or password. Please try again.')
-
-
 def check_email(email):
     for user in get_users():
         if user.email == email:
             print('Email already exist. Please enter other email or contact administrator for password recovery.')
             return False
     return True
-
-
-def register():
-    # email = ''
-    while True:
-        email = input('Please enter your email: ')
-        if check_email(email):
-            break
-    user = dict()
-    user['email'] = email
-    user['password'] = input('Please enter your password: ')
-    user['first_name'] = input('Enter first name: ')
-    user['last_name'] = input('Enter last name: ')
-    user['phone_number'] = input('Enter phone number: ')
-    user['role'] = 'user'
-    user['created'] = datetime.now()
-    existing_file = path.isfile('users.csv')
-    with open('users.csv', 'a', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=user.keys())
-        if not existing_file:
-            writer.writeheader()
-        writer.writerow(user)
-    main_menu(Users(**user))
